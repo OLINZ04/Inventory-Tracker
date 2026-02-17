@@ -1,0 +1,15 @@
+{
+  "name": "files",
+  "version": "1.0.0",
+  "description": "A modern, fully-functional inventory tracking system built with PHP, MySQL, JavaScript, HTML, and CSS. Features real-time stock management with boxes and pieces tracking.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo Running dev mode",
+    "start": "echo Starting project",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

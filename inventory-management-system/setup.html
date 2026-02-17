@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Setup - Inventory System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .setup-container {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+        .subtitle {
+            color: #718096;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .alert.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+            display: block;
+        }
+        .alert.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            display: block;
+        }
+        .info-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+            color: #1e40af;
+        }
+        .info-box strong {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <h1>🚀 Database Setup</h1>
+        <p class="subtitle">Configure your inventory system database</p>
+
+        <div id="alertBox" class="alert"></div>
+
+        <div class="info-box">
+            <strong>📋 Default Credentials:</strong>
+            Host: localhost<br>
+            Database: inventory_system<br>
+            Username: root<br>
+            Password: (leave empty for XAMPP/MAMP)
+        </div>
+
+        <form id="setupForm">
+            <div class="form-group">
+                <label for="host">Database Host</label>
+                <input type="text" id="host" name="host" value="localhost" required>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Database Username</label>
+                <input type="text" id="username" name="username" value="root" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Database Password</label>
+                <input type="password" id="password" name="password" placeholder="Leave empty if no password">
+            </div>
+
+            <div class="form-group">
+                <label for="database">Database Name</label>
+                <input type="text" id="database" name="database" value="inventory_system" required>
+            </div>
+
+            <button type="submit" class="btn" id="setupBtn">Create Database & Tables</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('setupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('setupBtn');
+            const alertBox = document.getElementById('alertBox');
+            
+            btn.disabled = true;
+            btn.textContent = 'Setting up...';
+            alertBox.style.display = 'none';
+
+            const formData = new FormData(this);
+            
+            try {
+                const response = await fetch('setup_handler.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alertBox.className = 'alert success';
+                    alertBox.textContent = '✅ ' + result.message + ' Redirecting to dashboard...';
+                    alertBox.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    alertBox.className = 'alert error';
+                    alertBox.textContent = '❌ ' + result.message;
+                    alertBox.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'Create Database & Tables';
+                }
+            } catch (error) {
+                alertBox.className = 'alert error';
+                alertBox.textContent = '❌ Error: ' + error.message;
+                alertBox.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Create Database & Tables';
+            }
+        });
+    </script>
+</body>
+</html>

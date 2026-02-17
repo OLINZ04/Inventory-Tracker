@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upstairs Inventory Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 16V8C21 7.45 20.55 7 20 7H4C3.45 7 3 7.45 3 8V16C3 16.55 3.45 17 4 17H20C20.55 17 21 16.55 21 16Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 9H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M9 13H15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-primary">UPSTAIRS</span>
+                    <span class="logo-secondary">INVENTORY TRACKER</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="search-container">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 17C13.4183 17 17 13.4183 17 9C17 4.58172 13.4183 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 4.58172 17 9 17Z" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19 19L14.65 14.65" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search inventory (name, category)...">
+                </div>
+                <button class="btn btn-primary" onclick="openAddItemModal()">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 4V16M4 10H16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Add Item
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Inventory Management</h1>
+                <p class="page-subtitle">Track stock levels across pieces and boxes in real-time.</p>
+            </div>
+
+            <!-- Inventory Table -->
+            <div class="table-container">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th class="col-item">ITEM DETAILS</th>
+                            <th class="col-category">CATEGORY</th>
+                            <th class="col-stock">STOCK LEVELS</th>
+                            <th class="col-actions">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <!-- Dynamic content will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Pull In Modal -->
+    <div id="pullInModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header pull-in-header">
+                <div>
+                    <h2 class="modal-title">Pull In Stock</h2>
+                    <p class="modal-subtitle" id="pullInItemName"></p>
+                </div>
+                <button class="modal-close" onclick="closePullInModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="current-inventory">
+                    <span class="label">Current Inventory</span>
+                    <span class="value" id="pullInCurrentStock"></span>
+                </div>
+
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="pull-in" onclick="switchTab('pull-in')">Pull In (+)</button>
+                    <button class="tab-btn" data-tab="pull-out" onclick="switchToPullOut()">Pull Out (-)</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>QUANTITY</label>
+                        <input type="number" id="pullInQuantity" class="form-input" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>UNIT</label>
+                        <select id="pullInUnit" class="form-select">
+                            <option value="boxes">Boxes</option>
+                            <option value="pieces">Pieces</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="info-text">
+                    <span>Adding</span>
+                    <span class="highlight" id="pullInPreview">24 total pieces</span>
+                </div>
+
+                <button class="btn btn-confirm btn-pull-in" onclick="confirmPullIn()">Confirm Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pull Out Modal -->
+    <div id="pullOutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header pull-out-header">
+                <div>
+                    <h2 class="modal-title">Pull Out Stock</h2>
+                    <p class="modal-subtitle" id="pullOutItemName"></p>
+                </div>
+                <button class="modal-close" onclick="closePullOutModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="current-inventory">
+                    <span class="label">Current Inventory</span>
+                    <span class="value" id="pullOutCurrentStock"></span>
+                </div>
+
+                <div class="tab-buttons">
+                    <button class="tab-btn" data-tab="pull-in" onclick="switchToPullIn()">Pull In (+)</button>
+                    <button class="tab-btn active" data-tab="pull-out" onclick="switchTab('pull-out')">Pull Out (-)</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>QUANTITY</label>
+                        <input type="number" id="pullOutQuantity" class="form-input" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>UNIT</label>
+                        <select id="pullOutUnit" class="form-select">
+                            <option value="boxes">Boxes</option>
+                            <option value="pieces">Pieces</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="info-text">
+                    <span>Withdrawing</span>
+                    <span class="highlight" id="pullOutPreview">24 total pieces</span>
+                </div>
+
+                <button class="btn btn-confirm btn-pull-out" onclick="confirmPullOut()">Confirm Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editItemModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header-simple">
+                <div>
+                    <h2 class="modal-title">Edit Item</h2>
+                    <p class="modal-subtitle-simple">Update item details</p>
+                </div>
+                <button class="modal-close-simple" onclick="closeEditItemModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" id="editItemName" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="editItemCategory" class="form-select">
+                        <option value="Hardware">Hardware</option>
+                        <option value="Fasteners">Fasteners</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Materials">Materials</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeEditItemModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="confirmEditItem()">Update Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header-simple">
+                <div>
+                    <h2 class="modal-title">Add New Item</h2>
+                    <p class="modal-subtitle-simple">Add a single item to inventory</p>
+                </div>
+                <button class="modal-close-simple" onclick="closeAddItemModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="#64748B" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-buttons-simple">
+                    <button class="tab-btn-simple active">Single Item</button>
+                    <button class="tab-btn-simple" disabled>Bulk Paste</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" id="addItemName" class="form-input" placeholder="e.g. Copper Rivet">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="addItemCategory" class="form-select">
+                        <option value="Hardware">Hardware</option>
+                        <option value="Fasteners">Fasteners</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Materials">Materials</option>
+                    </select>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeAddItemModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="confirmAddItem()">Save Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

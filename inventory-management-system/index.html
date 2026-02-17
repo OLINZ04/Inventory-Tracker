@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upstairs Inventory Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M21 16V8C21 7.45 20.55 7 20 7H4C3.45 7 3 7.45 3 8V16C3 16.55 3.45 17 4 17H20C20.55 17 21 16.55 21 16Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 9H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M9 13H15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-primary">UPSTAIRS</span>
+                    <span class="logo-secondary">INVENTORY TRACKER</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="search-container">
+                    <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M9 17C13.4183 17 17 13.4183 17 9C17 4.58172 13.4183 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 4.58172 17 9 17Z" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M19 19L14.65 14.65" stroke="#94A3B8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search inventory (name, category)...">
+                </div>
+                <button class="btn btn-primary" onclick="openAddItemModal()">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 4V16M4 10H16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Add Item
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+           <!-- Bulk Actions -->
+          <div class="bulk-actions">
+    <button class="btn btn-danger" onclick="deleteSelectedItems()">Delete Selected</button>
+    <button class="btn btn-secondary" onclick="printInventory()">Print Inventory</button>
+</div>
+
+
+           <table class="inventory-table">
+               <thead>
+                   <tr>
+                       <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                       <th class="col-item">ITEM DETAILS</th>
+                       <th class="col-category">CATEGORY</th>
+                       <th class="col-stock">STOCK LEVELS</th>
+                       <th class="col-actions">ACTIONS</th>
+                   </tr>
+               </thead>
+               <tbody id="inventoryTableBody">
+                   <!-- Dynamic content loaded via JS -->
+               </tbody>
+           </table>
+        </main>
+    </div>
+
+    <!-- Pull In Modal -->
+    <div id="pullInModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header pull-in-header">
+                <div>
+                    <h2 class="modal-title">Pull In Stock</h2>
+                    <p class="modal-subtitle" id="pullInItemName"></p>
+                </div>
+                <button class="modal-close" onclick="closePullInModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="current-inventory">
+                    <span class="label">Current Inventory</span>
+                    <span class="value" id="pullInCurrentStock"></span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Boxes</label>
+                        <input type="number" id="pullInBoxes" class="form-input" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Pieces</label>
+                        <input type="number" id="pullInPieces" class="form-input" value="0" min="0">
+                    </div>
+                </div>
+                <button class="btn btn-confirm btn-pull-in" onclick="confirmPullIn()">Confirm Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pull Out Modal -->
+    <div id="pullOutModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header pull-out-header">
+                <div>
+                    <h2 class="modal-title">Pull Out Stock</h2>
+                    <p class="modal-subtitle" id="pullOutItemName"></p>
+                </div>
+                <button class="modal-close" onclick="closePullOutModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="current-inventory">
+                    <span class="label">Current Inventory</span>
+                    <span class="value" id="pullOutCurrentStock"></span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Boxes</label>
+                        <input type="number" id="pullOutBoxes" class="form-input" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Pieces</label>
+                        <input type="number" id="pullOutPieces" class="form-input" value="0" min="0">
+                    </div>
+                </div>
+                <button class="btn btn-confirm btn-pull-out" onclick="confirmPullOut()">Confirm Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editItemModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header-simple">
+                <div>
+                    <h2 class="modal-title">Edit Item</h2>
+                    <p class="modal-subtitle-simple">Update item details</p>
+                </div>
+                <button class="modal-close-simple" onclick="closeEditItemModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" id="editItemName" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="editItemCategory" class="form-select">
+                        <option>EASY|Syrup 2.5kg</option>
+                            <option>DRIZZLE 2.5kgx6|drizzle</option>
+                            <option>ESSENTIAL|easy e</option>
+                            <option>TOPPINGS|easy ts</option>
+                            <option>POWDER BASE|easy pb</option>
+                            <option>SOFT SERVE BASE|easy ss</option>
+                            <option>SIG. SYRUP|signature sy</option>
+                            <option>SIG. POWDER BASE|signature pb</option>
+                            <option>POWDER MIX|powder mix</option>
+                            <option>FRIES POWDER 100g|fries</option>
+                            <option>CHEESE SAUCE DIP|dip</option>
+                            <option>PREMIUM SAUCES|premium</option>
+                            <option>PLASTIC CUPS AND LIDS</option>
+                            <option>PLASTIC PRODUCTS|easy ts</option>
+                            <option>STYRO PRODUCTS|stp</option>
+                            <option>PAPER PRODUCTS|papr</option>
+                            <option>MICROWABABLES|micro</option>
+                            <option>EQUIPMENTS|greq</option>
+                            <option>CONES|cones</option>
+                            <option>CUP ORGANIZERS|cup org</option>
+                            <option>CONES|cones</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeEditItemModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="confirmEditItem()">Update Item</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="addItemModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header-simple">
+                <div>
+                    <h2 class="modal-title">Add New Item</h2>
+                    <p class="modal-subtitle-simple">Add items to inventory</p>
+                </div>
+                <button class="modal-close-simple" onclick="closeAddItemModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="tab-buttons-simple">
+                    <button class="tab-btn-simple active" id="tabSingle" onclick="showSingleTab()">Single Item</button>
+                    <button class="tab-btn-simple" id="tabBulk" onclick="showBulkTab()">Bulk Paste</button>
+                </div>
+
+                <!-- SINGLE -->
+                <div id="singleTab">
+                    <div class="form-group">
+                        <label>Item Name</label>
+                        <input type="text" id="addItemName" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="addItemCategory" class="form-select">
+                            <option>EASY|Syrup 2.5kg</option>
+                            <option>DRIZZLE 2.5kgx6|drizzle</option>
+                            <option>ESSENTIAL|easy e</option>
+                            <option>TOPPINGS|easy ts</option>
+                            <option>POWDER BASE|easy pb</option>
+                            <option>SOFT SERVE BASE|easy ss</option>
+                            <option>SIG. SYRUP|signature sy</option>
+                            <option>SIG. POWDER BASE|signature pb</option>
+                            <option>POWDER MIX|powder mix</option>
+                            <option>FRIES POWDER 100g|fries</option>
+                            <option>CHEESE SAUCE DIP|dip</option>
+                            <option>PREMIUM SAUCES|premium</option>
+                            <option>PLASTIC CUPS AND LIDS</option>
+                            <option>PLASTIC PRODUCTS|easy ts</option>
+                            <option>STYRO PRODUCTS|stp</option>
+                            <option>PAPER PRODUCTS|papr</option>
+                            <option>MICROWABABLES|micro</option>
+                            <option>EQUIPMENTS|greq</option>
+                            <option>CONES|cones</option>
+                            <option>CUP ORGANIZERS|cup org</option>
+                            <option>CONES|cones</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeAddItemModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="confirmAddItem()">Save Item</button>
+                    </div>
+                </div>
+
+                <!-- BULK -->
+                <div id="bulkTab" style="display:none">
+                    <div class="form-group">
+                        <label>Items List</label>
+                        <textarea id="bulkItems" class="form-input" rows="8"
+                            placeholder="Item 1
+Item 2, Tools
+Item 3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Default Category</label>
+                        <select id="bulkDefaultCategory" class="form-select">
+                            <option>EASY|Syrup 2.5kg</option>
+                            <option>DRIZZLE 2.5kgx6|drizzle</option>
+                            <option>ESSENTIAL|easy e</option>
+                            <option>TOPPINGS|easy ts</option>
+                            <option>POWDER BASE|easy pb</option>
+                            <option>SOFT SERVE BASE|easy ss</option>
+                            <option>SIG. SYRUP|signature sy</option>
+                            <option>SIG. POWDER BASE|signature pb</option>
+                            <option>POWDER MIX|powder mix</option>
+                            <option>FRIES POWDER 100g|fries</option>
+                            <option>CHEESE SAUCE DIP|dip</option>
+                            <option>PREMIUM SAUCES|premium</option>
+                            <option>PLASTIC CUPS AND LIDS</option>
+                            <option>PLASTIC PRODUCTS|easy ts</option>
+                            <option>STYRO PRODUCTS|stp</option>
+                            <option>PAPER PRODUCTS|papr</option>
+                            <option>MICROWABABLES|micro</option>
+                            <option>EQUIPMENTS|greq</option>
+                            <option>CONES|cones</option>
+                            <option>CUP ORGANIZERS|cup org</option>
+                            <option>CONES|cones</option>
+                        </select>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeAddItemModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="confirmBulkAdd()">Add Multiple</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Update Stock Modal -->
+<div id="updateStockModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header pull-in-header">
+            <div>
+                <h2 class="modal-title">Update Stock</h2>
+                <p class="modal-subtitle" id="updateStockItemName"></p>
+            </div>
+            <button class="modal-close" onclick="closeUpdateStockModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Boxes</label>
+                    <input type="number" id="updateStockBoxes" class="form-input" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Pieces</label>
+                    <input type="number" id="updateStockPieces" class="form-input" min="0">
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="confirmUpdateStock()">Update Stock</button>
+        </div>
+    </div>
+</div>
+
+
+    <script src="js/app.js"></script>
+</body>
+<!-- Printable Inventory Table -->
+<div id="printableInventory" style="display:none;">
+    <h2>Inventory Report</h2>
+    <table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Boxes</th>
+                <th>Pieces</th>
+                
+                
+            </tr>
+        </thead>
+        <tbody id="printInventoryBody">
+            <!-- Filled dynamically -->
+        </tbody>
+    </table>
+</div>
+
+</html>
